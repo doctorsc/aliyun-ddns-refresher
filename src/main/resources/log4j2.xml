@@ -2,33 +2,33 @@
 <Configuration monitorInterval="1" status="ERROR"
 	strict="true" name="LogConfig">
 	<Properties>
-		<Property name="logbasedir">~/logs</Property>
+		<Property name="logbasedir">/Users/shencong/logs</Property>
 		<Property name="log.layout">%d %-5p %t (%c:%L) - %m%n</Property>
 	</Properties>
 
 	<Appenders>
-		<Appender type="Console" name="STDOUT">
+		<Appender type="Console" name="SYSTEM_OUT">
 			<Target>SYSTEM_OUT</Target>
 			<Layout type="PatternLayout" pattern="${log.layout}" />
 		</Appender>
 		<Appender type="RollingFile" name="FILE"
-			fileName="${logbasedir}/jutap-${sys:APPNAME}.log"
-			filePattern="${logbasedir}/jutap-${sys:APPNAME}-%d{yyyy-MM-dd}.%i.log">
+			fileName="${logbasedir}/refresher_common.log"
+			filePattern="${logbasedir}/refresher_common_%d{yyyy-MM-dd}.%i.log">
 			<Policies>
 				<TimeBasedTriggeringPolicy />
-				<SizeBasedTriggeringPolicy size="100 MB" />
+				<SizeBasedTriggeringPolicy size="20 MB" />
 			</Policies>
 			<Layout type="PatternLayout">
 				<Charset>GBK</Charset>
 				<Pattern>${log.layout}</Pattern>
 			</Layout>
 		</Appender>
-		<Appender type="RollingFile" name="ExceptionLog"
-			fileName="${logbasedir}/exception-${sys:APPNAME}.log"
-			filePattern="${logbasedir}/exception-${sys:APPNAME}-%d{yyyy-MM-dd}.%i.log">
+		<Appender type="RollingFile" name="ERROR"
+			fileName="${logbasedir}/refresher_error.log"
+			filePattern="${logbasedir}/refresher_error_%d{yyyy-MM-dd}.%i.log">
 			<Policies>
 				<TimeBasedTriggeringPolicy />
-				<SizeBasedTriggeringPolicy size="100 MB" />
+				<SizeBasedTriggeringPolicy size="20 MB" />
 			</Policies>
 			<Layout type="PatternLayout">
 				<Charset>GBK</Charset>
@@ -38,15 +38,16 @@
 	</Appenders>
 
 	<Loggers>
-		<Logger name="exception" level="error" additivity="false">
-			<AppenderRef ref="ExceptionLog" />
+		<Logger name="info.shenc" level="error" additivity="false">
+			<AppenderRef ref="ERROR" />
+		</Logger>
+		<Logger name="info.shenc" level="info" additivity="false">
+			<AppenderRef ref="FILE" />
 		</Logger>
 
-		<Root level="debug">
-			<AppenderRef ref="STDOUT" />
-			<AppenderRef ref="FILE" />
+		<Root level="info">
+			<AppenderRef ref="SYSTEM_OUT" />
 		</Root>
-		<Logger name="info.shenc" level="debug" />
 	</Loggers>
 
 </Configuration>
