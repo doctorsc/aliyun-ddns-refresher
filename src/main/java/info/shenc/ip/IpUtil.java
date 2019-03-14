@@ -128,7 +128,7 @@ public class IpUtil {
         int begPos = newhtml.indexOf("[");
         int endPos = newhtml.indexOf("]");
         ip = newhtml.substring(begPos + 1, endPos);
-        System.out.println("ip:" + ip);
+        logger.info("ip:" + ip);
 
         return ip;
     }

@@ -4,14 +4,10 @@
 package info.shenc.task;
 
 import java.util.List;
-import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import com.aliyuncs.DefaultAcsClient;
-import com.aliyuncs.IAcsClient;
 import com.aliyuncs.alidns.model.v20150109.DescribeDomainRecordsRequest;
 import com.aliyuncs.alidns.model.v20150109.DescribeDomainRecordsResponse;
 import com.aliyuncs.alidns.model.v20150109.DescribeDomainRecordsResponse.Record;
@@ -19,8 +15,6 @@ import com.aliyuncs.alidns.model.v20150109.UpdateDomainRecordRequest;
 import com.aliyuncs.alidns.model.v20150109.UpdateDomainRecordResponse;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.exceptions.ServerException;
-import com.aliyuncs.profile.DefaultProfile;
-import com.aliyuncs.profile.IClientProfile;
 import info.shenc.ip.IpUtil;
 
 /**
@@ -28,38 +22,17 @@ import info.shenc.ip.IpUtil;
  *
  */
 @Component
-public class RefreshTask {
+public class RefreshTask extends AliyunProfile {
     private static Logger logger = LoggerFactory.getLogger(RefreshTask.class);
 
-    private IAcsClient client = null;
-    private static String regionId = "cn-hangzhou"; // 域名SDK请使用固定值"cn-hangzhou"
-
-    @Value("${accessKeyId}")
-    private String accessKeyId; // your accessKey
-    @Value("${accessKeySecret}")
-    private String accessKeySecret;// your accessSecret
-
-    private IClientProfile profile = null;
     private static String MY_DOMAIN = "shenc.info";
     private static String UPDATE_ACTION_NAME = "UpdateDomainRecord";
     private static String QUERY_ACTION_NAME = "DescribeDomainRecords";
 
     /**
-     * 初始化client
-     */
-    @PostConstruct
-    private void init() {
-        profile = DefaultProfile.getProfile(regionId, accessKeyId, accessKeySecret);
-        // 若报Can not find endpoint to access异常，请添加以下此行代码
-        // DefaultProfile.addEndpoint("cn-hangzhou", "cn-hangzhou", "Domain",
-        // "domain.aliyuncs.com");
-        client = new DefaultAcsClient(profile);
-    }
-
-    /**
      * 定时任务调起刷新域名下挂ip
      */
-    @Scheduled(cron = "0/30 * * * * ?")
+    @Scheduled(cron = "1/30 * * * * ?")
     public void refresh() {
         logger.info("开始刷新ip...");
         List<Record> domainRecordList = getDomainRecords();
@@ -69,7 +42,9 @@ public class RefreshTask {
             logger.info("current dns record info|" + "recordid:" + r.getRecordId() + ",domainname:"
                     + r.getDomainName() + ",RR:" + r.getRR() + ",type:" + r.getType() + ",value:"
                     + r.getValue());
-            doRefresh(r, newIpAddr);
+            if ("A".equals(r.getType())) {
+                doRefresh(r, newIpAddr);
+            }
         }
         logger.info("刷新ip任务完成");
     }
@@ -92,6 +67,7 @@ public class RefreshTask {
             request.setRR(r.getRR());
             request.setType(r.getType());
             request.setValue(newIpAddr);
+            // request.setValue("115.193.181.21");
             try {
                 response = client.getAcsResponse(request);
             } catch (ServerException e) {

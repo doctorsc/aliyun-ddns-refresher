@@ -38,13 +38,6 @@
 	</Appenders>
 
 	<Loggers>
-		<Logger name="info.shenc" level="error" additivity="false">
-			<AppenderRef ref="ERROR" />
-		</Logger>
-		<Logger name="info.shenc" level="info" additivity="false">
-			<AppenderRef ref="FILE" />
-		</Logger>
-
 		<Root level="info">
 			<AppenderRef ref="SYSTEM_OUT" />
 		</Root>
